@@ -1,3 +1,6 @@
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
@@ -14,22 +17,13 @@ public class Main {
                 "signatarios-out-2014.txt"
         };
 
-        Thread[] threads = new Thread[arquivos.length];
+        try(ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
-        for (int i = 0; i < threads.length; i++) {
+            for (String arquivo : arquivos) {
+                BuscaNomeRunnable busca = new BuscaNomeRunnable(arquivo, procurado);
+                executor.execute(busca);
+            }
 
-            BuscaNomeRunnable busca = new BuscaNomeRunnable(arquivos[i], procurado);
-            //threads[i] = new Thread(busca);              <- plataforms threads
-            //threads[i].start();
-
-            threads[i] = Thread.ofVirtual()              //<- virtual threads
-                    .name("busca-"+(i+1))
-                    .start(busca);
-
-        }
-
-        for (Thread thread : threads) {
-            thread.join();
         }
 
         long fim =  System.currentTimeMillis();
